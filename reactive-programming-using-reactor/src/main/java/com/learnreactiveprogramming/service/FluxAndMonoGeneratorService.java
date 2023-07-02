@@ -72,7 +72,7 @@ public class FluxAndMonoGeneratorService {
     }
 
     public Flux<String> splitString_withDelay(String name) {
-        log.info("splitString_withDelay::name:{}" ,name);
+        log.info("splitString_withDelay::name:{}", name);
         String[] split = name.split("");
         int i = new Random().nextInt(1000);
         return Flux.fromArray(split)
@@ -102,6 +102,45 @@ public class FluxAndMonoGeneratorService {
                 .transform(myfilter)
                 .flatMap(this::splitString)
                 .log();
+    }
+
+    public Flux<String> exploreMerge() {
+        Flux<String> stringFlux = Flux.just("A", "B", "C")
+                .delayElements(Duration.ofMillis(100))
+                .log();
+
+
+        Flux<String> stringFlux2 = Flux.just("1", "2", "3")
+                .delayElements(Duration.ofMillis(125))
+                .log();
+
+        return Flux.merge(stringFlux, stringFlux2).log();
+    }
+
+    public Flux<String> exploreMergeConcat() {
+        Flux<String> stringFlux = Flux.just("A", "B", "C")
+                .delayElements(Duration.ofMillis(100))
+                .log();
+
+
+        Flux<String> stringFlux2 = Flux.just("1", "2", "3")
+                .delayElements(Duration.ofMillis(125))
+                .log();
+
+        return Flux.concat(stringFlux, stringFlux2).log();
+    }
+
+    public Flux<String> exploreMergeSequent() {
+        Flux<String> stringFlux = Flux.just("A", "B", "C")
+                .delayElements(Duration.ofMillis(100))
+                .log();
+
+
+        Flux<String> stringFlux2 = Flux.just("1", "2", "3")
+                .delayElements(Duration.ofMillis(125))
+                .log();
+
+        return Flux.mergeSequential(stringFlux, stringFlux2).log();
     }
 
     public static void main(String[] args) {
