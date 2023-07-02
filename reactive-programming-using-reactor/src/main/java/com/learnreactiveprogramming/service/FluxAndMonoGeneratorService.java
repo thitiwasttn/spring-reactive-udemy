@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 @Slf4j
 public class FluxAndMonoGeneratorService {
@@ -57,6 +58,14 @@ public class FluxAndMonoGeneratorService {
                 .log(); // db or a remote service call
     }
 
+    public Flux<String> namesFlux_concatmap(int stringLength) {
+        return Flux.fromIterable(List.of("alex", "ben", "chloe"))
+                .map(String::toUpperCase)
+                .filter(s -> s.length() > stringLength)
+                .concatMap(this::splitString_withDelay)
+                .log(); // db or a remote service call
+    }
+
     public Flux<String> splitString(String name) {
         String[] split = name.split("");
         return Flux.fromArray(split);
@@ -69,6 +78,30 @@ public class FluxAndMonoGeneratorService {
         return Flux.fromArray(split)
                 .delayElements(Duration.ofMillis(i))
                 ;
+    }
+
+    public Mono<List<String>> namesMono_flatMap(int stringLength) {
+        return Mono.just("alex")
+                .map(String::toUpperCase)
+                .filter(s -> s.length() > stringLength)
+                .flatMap(this::splitStringMono)
+                .log();
+    }
+
+    private Mono<List<String>> splitStringMono(String s) {
+        String[] split = s.split("");
+        List<String> split1 = List.of(split);//ALEX -> A, L, E, E
+        return Mono.just(split1);
+    }
+
+    public Flux<String> namesFlux_transform(int stringLength) {
+        Function<Flux<String>, Flux<String>> myfilter = name -> name.map(String::toUpperCase)
+                .filter(s -> s.length() > stringLength);
+
+        return Flux.fromIterable(List.of("alex", "ben", "chloe"))
+                .transform(myfilter)
+                .flatMap(this::splitString)
+                .log();
     }
 
     public static void main(String[] args) {

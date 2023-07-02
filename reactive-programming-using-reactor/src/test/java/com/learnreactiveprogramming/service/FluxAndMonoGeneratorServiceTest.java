@@ -1,8 +1,11 @@
 package com.learnreactiveprogramming.service;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.List;
 import java.util.concurrent.Delayed;
 
 class FluxAndMonoGeneratorServiceTest {
@@ -82,13 +85,57 @@ class FluxAndMonoGeneratorServiceTest {
             System.out.println("test " + s);
         });
 
-        while (true) {
+        /*while (true) {
             //
-        }
+        }*/
 
         /*StepVerifier.create(stringFlux)
                 //.expectNext("A", "L", "E", "X", "C", "H", "L", "O", "E")
                  .expectNextCount(9)
                 .verifyComplete();*/
+    }
+
+    @Test
+    void namesFlux() {
+    }
+
+    @Test
+    void namesMono() {
+    }
+
+    @Test
+    void namesFlux_concatmap() {
+        var stringFlux = fluxAndMonoGeneratorService.namesFlux_concatmap(3);
+
+        StepVerifier.create(stringFlux)
+                .expectNext("A", "L", "E", "X", "C", "H", "L", "O", "E")
+                //.expectNextCount(9)
+                .verifyComplete();
+
+    }
+
+    @Test
+    void splitString() {
+    }
+
+    @Test
+    void splitString_withDelay() {
+    }
+
+    @Test
+    void namesMono_flatMap() {
+        Mono<List<String>> listMono = fluxAndMonoGeneratorService.namesMono_flatMap(3);
+
+        StepVerifier.create(listMono)
+                .expectNext(List.of("A", "L", "E", "X"))
+                .verifyComplete();
+    }
+
+    @Test
+    void namesFlux_transform() {
+        Flux<String> stringFlux = fluxAndMonoGeneratorService.namesFlux_transform(3);
+        StepVerifier.create(stringFlux)
+                .expectNext("A", "L", "E", "X", "C", "H", "L", "O", "E")
+                .verifyComplete();
     }
 }
