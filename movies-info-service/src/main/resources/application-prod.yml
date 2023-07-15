@@ -1,0 +1,10 @@
+
+spring:
+  config:
+    activate:
+      on-profile:
+        - prod
+  data:
+    mongodb:
+      uri: mongodb+srv://twopee26:DJt04i9WaHkTS4Bj@cluster0.krecjgw.mongodb.net/?retryWrites=true&w=majority
+      database: local
