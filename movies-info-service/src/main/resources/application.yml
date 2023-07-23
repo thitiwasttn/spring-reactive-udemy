@@ -1,41 +1,6 @@
+server:
+  port: 8081
 spring:
-  profiles:
-    active: local
----
-
-spring:
-  config:
-    activate:
-      on-profile:
-        - local
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-
----
-spring:
-  config:
-    activate:
-      on-profile:
-        - non-prod
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-
----
-spring:
-  config:
-    activate:
-      on-profile:
-        - prod
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-
----
-logging:
-  level:
-    root: debug
+  mongodb:
+    embedded:
+      version: 4.0.21
