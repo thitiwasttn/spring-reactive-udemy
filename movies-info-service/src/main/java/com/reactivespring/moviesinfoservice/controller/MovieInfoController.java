@@ -1,6 +1,7 @@
 package com.reactivespring.moviesinfoservice.controller;
 
 import com.reactivespring.moviesinfoservice.domain.MovieInfo;
+import com.reactivespring.moviesinfoservice.exception.MoviesInfoNotFoundException;
 import com.reactivespring.moviesinfoservice.service.MovieInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,17 +29,28 @@ public class MovieInfoController {
 
 
     @GetMapping("/movie-infos")
-    public ResponseEntity<Flux<MovieInfo>> getAllMovies() {
-        return ResponseEntity.ok(movieInfoService.findAll().log());
+    public Flux<MovieInfo> getAllMovies() {
+        return movieInfoService.findAll().log();
     }
 
     @GetMapping("/movie-infos/{id}")
-    public ResponseEntity<Mono<MovieInfo>> getMovieById(@PathVariable String id) {
-        return ResponseEntity.ok(movieInfoService.getMovieInfoById(id).log());
+    public Mono<ResponseEntity<MovieInfo>> getMovieById(@PathVariable String id) {
+        return movieInfoService.getMovieInfoById(id)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.error(new MoviesInfoNotFoundException(id)))
+                .log();
     }
 
     @PutMapping("/movie-infos/{id}")
-    public Mono<MovieInfo> updateMovie(@RequestBody MovieInfo movieInfo, @PathVariable String id) {
-        return movieInfoService.update(movieInfo, id).log();
+    public Mono<ResponseEntity<MovieInfo>> updateMovie(@RequestBody MovieInfo movieInfo, @PathVariable String id) {
+        return movieInfoService.update(movieInfo, id)
+                .map(ResponseEntity.ok()::body)
+                .switchIfEmpty(Mono.error(new MoviesInfoNotFoundException(id)))
+                .log();
+    }
+
+    @DeleteMapping("/movie-infos/{id}")
+    public ResponseEntity<Mono<Void>> deleteMovieInfo(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(movieInfoService.deleteMovieInfo(id).log());
     }
 }

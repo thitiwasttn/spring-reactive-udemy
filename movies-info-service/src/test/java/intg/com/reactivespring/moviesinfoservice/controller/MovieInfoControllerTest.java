@@ -30,6 +30,7 @@ class MovieInfoControllerTest {
     static String ADD_MOVIE_INFO_URL = "/v1/movie-infos";
     static String FIND_ALL_MOVIE_INFO = "/v1/movie-infos";
     static String FIND_MOVIE_BY_ID = "/v1/movie-infos";
+    static String DELETE_MOVIE_BY_ID = "/v1/movie-infos";
 
     @BeforeEach
     void setup() {
@@ -109,5 +110,25 @@ class MovieInfoControllerTest {
                 .isEqualTo(movieId);
 
 
+    }
+
+    @Test
+    void deleteMovieInfoById() {
+        String movieId = "abc";
+
+        webTestClient.delete()
+                .uri(DELETE_MOVIE_BY_ID + "/{id}", movieId)
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+
+        webTestClient.get()
+                .uri(FIND_MOVIE_BY_ID + "/{id}", movieId)
+                .exchange()
+                .expectBody(MovieInfo.class)
+                .consumeWith(entityExchangeResult -> {
+                    MovieInfo responseBody = entityExchangeResult.getResponseBody();
+                    assertNull(responseBody);
+                });
     }
 }

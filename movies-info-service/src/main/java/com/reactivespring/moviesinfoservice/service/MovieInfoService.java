@@ -34,21 +34,6 @@ public class MovieInfoService {
     public Mono<MovieInfo> update(MovieInfo movieInfo, String id) {
 
         return movieInfoRepository.findById(id)
-                .switchIfEmpty(Mono.error(new MoviesInfoNotFoundException(id)))
-                .doOnNext(movieInfo1 -> {
-                    log.info("do 1 :{}", movieInfo1);
-                })
-                .doOnNext(movieInfo1 -> {
-                    log.info("do 2 :{}", movieInfo1);
-                })
-                /*.handle((movieInfo1, synchronousSink) -> {
-                    log.info("do handle 1 :{}", movieInfo1);
-                    if (movieInfo.getName().equals("99")) {
-                        synchronousSink.error(new RuntimeException("Sample Throw errer"));
-                    } else {
-                        return ;
-                    }
-                })*/
                 .flatMap(movieInfo1 -> {
                     if (movieInfo.getName().equals("99")) {
                         return Mono.error(new RuntimeException("Sample Throw errer"));
@@ -59,9 +44,10 @@ public class MovieInfoService {
                     movieInfo1.setName(movieInfo.getName());
                     movieInfo1.setYear(movieInfo.getYear());
                     return movieInfoRepository.save(movieInfo1);
-                })
-                .doOnNext(movieInfo1 -> {
-                    log.info("do 3 :{}", movieInfo1);
                 });
+    }
+
+    public Mono<Void> deleteMovieInfo(String id) {
+        return movieInfoRepository.deleteById(id);
     }
 }
