@@ -18,6 +18,7 @@ public class ReviewRouter {
                 .nest(path("/v1/reviews"), builder -> {
                     builder.POST("", reviewHandler::addReview)
                             .GET("", reviewHandler::getReviews)
+                            .GET("/{id}", reviewHandler::getReviewsById)
                             .PUT("/{id}", reviewHandler::updateView)
                             .DELETE("/{id}", reviewHandler::deleteReview);
                 })
