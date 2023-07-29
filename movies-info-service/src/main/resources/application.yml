@@ -1,35 +1,6 @@
+server:
+  port: 8081
 spring:
-  profiles:
-    active: local
----
-spring:
-  config:
-    activate:
-      on-profile:
-        - local
-  data:
-    mongodb:
-      uri: mongodb+srv://twopee26:DJt04i9WaHkTS4Bj@cluster0.qmjjtph.mongodb.net/?retryWrites=true&w=majority
-      database: Cluster0
-
----
-spring:
-  config:
-    activate:
-      on-profile:
-        - non-prod
-  data:
-    mongodb:
-      uri: mongodb+srv://twopee26:DJt04i9WaHkTS4Bj@cluster0.qmjjtph.mongodb.net/?retryWrites=true&w=majority
-      database: local
-
----
-spring:
-  config:
-    activate:
-      on-profile:
-        - prod
-  data:
-    mongodb:
-      uri: mongodb+srv://twopee26:DJt04i9WaHkTS4Bj@cluster0.krecjgw.mongodb.net/?retryWrites=true&w=majority
-      database: local
+  mongodb:
+    embedded:
+      version: 4.0.21
