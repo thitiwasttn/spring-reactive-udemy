@@ -101,10 +101,22 @@ public class ReviewHandler {
             e.printStackTrace();
         }
 
+        Mono<Review> byId = reviewReactiveRepository.findById("1");
+
+        byId.doOnNext(x->log.info("byid1"))
+                .doOnNext(x-> {
+                    try {
+                        this.simulateCallApiSleepTime(x, 1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .subscribe();
+
         return serverResponseMono;
     }
 
-    private void simulateCallApiSleepTime(String stringKey, int second) throws InterruptedException {
+    private void simulateCallApiSleepTime(Object stringKey, int second) throws InterruptedException {
         log.info("simulate call to external api::start :{}", stringKey);
         Thread.sleep(second * 1000L);
         log.info("simulate call to external api::done:{}", stringKey);
