@@ -78,6 +78,8 @@ public class ReviewHandler {
                 .doOnNext(review1 -> simulateCallApiSleepTime("A1", 2))
                 .doOnNext(review1 -> log.info("test22"))
                 .switchIfEmpty(Mono.error(new ReviewNotFoundException("review not found " + reviewId)));
+
+
         Mono<ServerResponse> serverResponseMono = review.flatMap(review1 -> reviewMono
                 .doOnNext(review3 -> log.info("2"))
                 .doOnNext(this::testValidateComment)
