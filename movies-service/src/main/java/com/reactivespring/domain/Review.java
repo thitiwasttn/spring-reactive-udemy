@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +14,6 @@ public class Review {
     private String reviewId;
     private Long movieInfoId;
     private String comment;
-    //@Min(value = 0L, message = "rating.negative : rating is negative and please pass a non-negative value")
+    @Min(value = 0L, message = "rating.negative : rating is negative and please pass a non-negative value")
     private Double rating;
 }
