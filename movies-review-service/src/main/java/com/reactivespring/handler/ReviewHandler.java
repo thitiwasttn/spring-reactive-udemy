@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -65,60 +66,48 @@ public class ReviewHandler {
     public Mono<ServerResponse> updateView(ServerRequest request) {
         String reviewId = request.pathVariable("id");
         Mono<Review> reviewMono = request.bodyToMono(Review.class);
+
+        Mono<Review> byId = reviewReactiveRepository.findById("1");
+
+        Mono<Review> testSub = byId.doOnNext(x -> log.info("byid1"))
+                .doOnNext(x -> this.simulateCallApiSleepTime(x, 1));
+
+
         Mono<Review> review = reviewReactiveRepository.findById(reviewId)
                 .doOnNext(review1 -> log.info("test11"))
-                .doOnNext(review1 -> {
-                    try {
-                        simulateCallApiSleepTime("A1", 2);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                })
+                .doOnNext(review1 -> simulateCallApiSleepTime("A1", 2))
                 .doOnNext(review1 -> log.info("test22"))
                 .switchIfEmpty(Mono.error(new ReviewNotFoundException("review not found " + reviewId)));
         Mono<ServerResponse> serverResponseMono = review.flatMap(review1 -> reviewMono
                 .doOnNext(review3 -> log.info("2"))
                 .doOnNext(this::testValidateComment)
-                .doOnNext(review2 -> {
-                    try {
-                        simulateCallApiSleepTime("A2", 2);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                })
+                .doOnNext(review2 -> simulateCallApiSleepTime("A2", 2))
                 .doOnNext(review3 -> log.info("3"))
                 .map(review2 -> {
                     review1.setComment(review2.getComment());
                     review1.setRating(review2.getRating());
                     return review1;
                 })
+                // .doOnNext(review2 -> testSub.subscribe())
                 .flatMap(reviewReactiveRepository::save)
                 .flatMap(saveReview -> ServerResponse.ok().bodyValue(saveReview)));
 
-        try {
-            simulateCallApiSleepTime("A3", 2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        simulateCallApiSleepTime("A3", 2);
 
-        Mono<Review> byId = reviewReactiveRepository.findById("1");
-
-        byId.doOnNext(x->log.info("byid1"))
-                .doOnNext(x-> {
-                    try {
-                        this.simulateCallApiSleepTime(x, 1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .subscribe();
+        testSub.subscribe(review1 -> {
+            log.info("insub: testSub {}", review1);
+        });
 
         return serverResponseMono;
     }
 
-    private void simulateCallApiSleepTime(Object stringKey, int second) throws InterruptedException {
+    private void simulateCallApiSleepTime(Object stringKey, int second){
         log.info("simulate call to external api::start :{}", stringKey);
-        Thread.sleep(second * 1000L);
+        try {
+            Thread.sleep(second * 1000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         log.info("simulate call to external api::done:{}", stringKey);
     }
 
