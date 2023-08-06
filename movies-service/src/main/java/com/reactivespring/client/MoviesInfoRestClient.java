@@ -58,7 +58,7 @@ public class MoviesInfoRestClient {
 
     private Mono<Throwable> customThrowError4xx(ClientResponse clientResponse) {
         log.info("retrieveMovieInfo:: clientResponse.statusCode():{}", clientResponse.statusCode());
-        if (clientResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
+        if (clientResponse.statusCode().value() == (HttpStatus.NOT_FOUND.value())) {
             return clientResponse.bodyToMono(String.class)
                     .flatMap(s -> Mono.error(MoviesInfoClientException.builder()
                             .message(s)
