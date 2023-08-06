@@ -29,9 +29,11 @@ public class ReviewsRestClient {
     }
 
     public Flux<Review> retrieveReviewsByMovieId(String movieId) {
-        var url = UriComponentsBuilder.fromHttpUrl(reviewsInfoUrl)
+        var url = UriComponentsBuilder
+                .fromHttpUrl(reviewsInfoUrl)
                 .queryParam("movieInfoId", movieId)
-                .buildAndExpand().toUriString();
+                .buildAndExpand()
+                .toUriString();
         return webClient
                 .get()
                 .uri(url)

@@ -1,16 +1,17 @@
 package com.reactivespring.controller;
 
+import com.reactivespring.MoviesService;
 import com.reactivespring.client.MoviesInfoRestClient;
 import com.reactivespring.client.ReviewsRestClient;
 import com.reactivespring.domain.Movie;
 import com.reactivespring.domain.Review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -22,11 +23,13 @@ public class MoviesController {
 
     private final MoviesInfoRestClient moviesInfoRestClient;
     private final ReviewsRestClient reviewsRestClient;
+    private final MoviesService moviesService;
 
     @Autowired
-    public MoviesController(MoviesInfoRestClient moviesInfoRestClient, ReviewsRestClient reviewsRestClient) {
+    public MoviesController(MoviesInfoRestClient moviesInfoRestClient, ReviewsRestClient reviewsRestClient, MoviesService moviesService) {
         this.moviesInfoRestClient = moviesInfoRestClient;
         this.reviewsRestClient = reviewsRestClient;
+        this.moviesService = moviesService;
     }
 
     @GetMapping("/{id}")
@@ -35,16 +38,22 @@ public class MoviesController {
 
         return moviesInfoRestClient.retrieveMovieInfo(movieId)
                 .flatMap(movieInfo -> {
-                    log.info("retrieveMovieById::movieInfo :{}", movieInfo);
-                    Mono<List<Review>> listReviews = reviewsRestClient.retrieveReviewsByMovieId(movieInfo.getMovieInfoId())
+                    Mono<List<Review>> listReviews = reviewsRestClient
+                            .retrieveReviewsByMovieId(movieInfo.getMovieInfoId())
                             .collectList();
-                    return listReviews.map(reviews -> {
-                        log.info("retrieveMovieById::listReviews.map {}", reviews);
-                        Movie movie = new Movie();
-                        movie.setMovieInfo(movieInfo);
-                        movie.setReviewList(reviews);
-                        return movie;
-                    });
+                    return moviesService.mapReviewMovie(movieInfo, listReviews);
+                });
+    }
+
+    @GetMapping("/all")
+    public Flux<Movie> retrieveAllMovie() {
+        log.info("retrieveAllMovie()");
+        return moviesInfoRestClient.retrieveAllMovieInfo()
+                .flatMap(movieInfo -> {
+                    Mono<List<Review>> listReviews = reviewsRestClient
+                            .retrieveReviewsByMovieId(movieInfo.getMovieInfoId())
+                            .collectList();
+                    return moviesService.mapReviewMovie(movieInfo, listReviews);
                 });
     }
 }

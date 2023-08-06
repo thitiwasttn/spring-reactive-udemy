@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -26,7 +29,9 @@ public class MoviesInfoRestClient {
     }
 
     public Mono<MovieInfo> retrieveMovieInfo(String movieId) {
-        String url = moviesInfoUrl.concat("/").concat(movieId);
+        String url = moviesInfoUrl
+                .concat("/")
+                .concat(movieId);
         return webClient
                 .get()
                 .uri(url)
@@ -53,5 +58,21 @@ public class MoviesInfoRestClient {
                                 .message(s)
                                 .build())))
                 .bodyToMono(MovieInfo.class);
+    }
+
+    public Flux<MovieInfo> retrieveAllMovieInfo() {
+        log.info("retrieveAllMovieInfo()");
+        String url = moviesInfoUrl;
+        log.info("retrieveAllMovieInfo::url:{}", url);
+        return webClient
+                .get()
+                .uri(url)
+                .retrieve()
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> clientResponse
+                        .bodyToMono(String.class)
+                        .flatMap(s -> Mono.error(MoviesInfoServerException.builder()
+                                .message(s)
+                                .build())))
+                .bodyToFlux(MovieInfo.class);
     }
 }
