@@ -1,5 +1,11 @@
 package com.reactivespring.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Builder
 public class MoviesInfoClientException extends RuntimeException{
     private String message;
     private Integer statusCode;

@@ -13,8 +13,8 @@ import static org.springframework.http.ResponseEntity.notFound;
 public class RestExceptionHandler {
 
     @ExceptionHandler(MoviesInfoNotFoundException.class)
-    ResponseEntity postNotFound(MoviesInfoNotFoundException ex) {
-        log.debug("handling exception::" + ex);
+    ResponseEntity<String> postNotFound(MoviesInfoNotFoundException ex) {
+        log.error("handling exception::" + ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }

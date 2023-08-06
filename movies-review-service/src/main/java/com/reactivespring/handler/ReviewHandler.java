@@ -56,7 +56,7 @@ public class ReviewHandler {
     public Mono<ServerResponse> getReviews(ServerRequest request) {
         Optional<String> movieInfoId = request.queryParam("movieInfoId");
         if (movieInfoId.isPresent()) {
-            Flux<Review> byMovieInfoId = reviewReactiveRepository.findByMovieInfoId(Long.valueOf(movieInfoId.get()));
+            Flux<Review> byMovieInfoId = reviewReactiveRepository.findByMovieInfoId(movieInfoId.get());
             return ServerResponse.ok().body(byMovieInfoId, Review.class);
         }
         Flux<Review> all = reviewReactiveRepository.findAll();
