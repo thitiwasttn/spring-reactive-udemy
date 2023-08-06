@@ -1,6 +1,6 @@
 package com.reactivespring.controller;
 
-import com.reactivespring.MoviesService;
+import com.reactivespring.service.MoviesService;
 import com.reactivespring.client.MoviesInfoRestClient;
 import com.reactivespring.client.ReviewsRestClient;
 import com.reactivespring.domain.Movie;

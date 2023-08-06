@@ -1,4 +1,4 @@
-package com.reactivespring;
+package com.reactivespring.service;
 
 import com.reactivespring.client.ReviewsRestClient;
 import com.reactivespring.domain.Movie;
