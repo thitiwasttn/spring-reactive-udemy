@@ -14,7 +14,7 @@ public class ExceptionService {
     public RetryBackoffSpec getRetryBackoffSpec() {
         return Retry
                 .fixedDelay(1, Duration.ofSeconds(1))
-                .filter(ex -> ex instanceof MoviesInfoClientException)
+                //.filter(ex -> ex instanceof MoviesInfoClientException)
                 .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> Exceptions.propagate(retrySignal.failure()));
     }
 }
