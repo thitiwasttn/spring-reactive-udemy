@@ -1,5 +1,6 @@
 package com.reactivespring.client;
 
+import com.reactivespring.domain.Movie;
 import com.reactivespring.domain.MovieInfo;
 import com.reactivespring.exception.MoviesInfoClientException;
 import com.reactivespring.exception.MoviesInfoServerException;
@@ -79,5 +80,15 @@ public class MoviesInfoRestClient {
                 .flatMap(s -> Mono.error(MoviesInfoServerException.builder()
                         .message(s)
                         .build()));
+    }
+
+    public Flux<MovieInfo> retrieveAllMovieInfoStream() {
+        var url = moviesInfoUrl.concat("/stream");
+        return webClient
+                .get()
+                .uri(url)
+                .retrieve()
+                .onStatus(HttpStatus::is5xxServerError, this::customThrowError5xx)
+                .bodyToFlux(MovieInfo.class);
     }
 }

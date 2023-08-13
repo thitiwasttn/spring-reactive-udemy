@@ -5,16 +5,21 @@ import com.reactivespring.moviesinfoservice.exception.MoviesInfoNotFoundExceptio
 import com.reactivespring.moviesinfoservice.service.MovieInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
+
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/v1")
 public class MovieInfoController {
 
     private final MovieInfoService movieInfoService;
+    Sinks.Many<MovieInfo> movieInfoSink = Sinks.many().replay().latest();
 
     @Autowired
     public MovieInfoController(MovieInfoService movieInfoService) {
@@ -24,7 +29,9 @@ public class MovieInfoController {
     @PostMapping("/movie-infos")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<MovieInfo> addMovieInfo(@RequestBody MovieInfo movieInfo) {
-        return movieInfoService.addMovieInfo(movieInfo).log();
+        return movieInfoService.addMovieInfo(movieInfo)
+                .doOnNext(saved -> movieInfoSink.tryEmitNext(saved))
+                .log();
     }
 
 
@@ -33,12 +40,14 @@ public class MovieInfoController {
         return movieInfoService.findAll().log();
     }
 
-    @GetMapping("/movie-infos/{id}")
-    public Mono<ResponseEntity<MovieInfo>> getMovieById(@PathVariable String id) {
-        return movieInfoService.getMovieInfoById(id)
-                .map(ResponseEntity::ok)
-                .switchIfEmpty(Mono.error(new MoviesInfoNotFoundException(id)))
-                .log();
+    @GetMapping(value = "/movie-infos/stream", produces = MediaType.APPLICATION_NDJSON_VALUE)
+    public Flux<MovieInfo> getAllMoviesStream() {
+        return movieInfoSink.asFlux();
+    }
+
+    @GetMapping(value = "/movie-infos/stream2", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<MovieInfo> getAllMoviesStream2() {
+        return movieInfoSink.asFlux();
     }
 
     @PutMapping("/movie-infos/{id}")
